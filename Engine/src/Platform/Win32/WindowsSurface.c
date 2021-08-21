@@ -13,20 +13,23 @@ LRESULT CALLBACK WindowMessageCallback(HWND hWnd, UINT message, WPARAM wParam, L
 
     Win32_Surface* surface = cast(Win32_Surface*) GetWindowLongPtrA(hWnd, GWLP_USERDATA);
 
-    if (surface != nil) {
-        switch (message) {
-            case WM_CLOSE:
-            case WM_DESTROY: {
-            } break;
+    switch (message) {
+        case WM_NCCREATE: {
+            CREATESTRUCTA* createStruct = cast(CREATESTRUCTA*) lParam;
+            SetWindowLongPtrA(hWnd, GWLP_USERDATA, cast(LONG_PTR) createStruct->lpCreateParams);
+            result = DefWindowProcA(hWnd, message, wParam, lParam);
+        } break;
 
-            default: {
-                result = DefWindowProcA(hWnd, message, wParam, lParam);
-            } break;
-        }
-    } else {
-        CREATESTRUCTA* createStruct = cast(CREATESTRUCTA*) lParam;
-        SetWindowLongPtrA(hWnd, GWLP_USERDATA, cast(LONG_PTR) createStruct->lpCreateParams);
-        result = DefWindowProcA(hWnd, message, wParam, lParam);
+        case WM_CLOSE:
+        case WM_DESTROY: {
+            if (surface->Surface->OnCloseCallback != nil) {
+                surface->Surface->OnCloseCallback(surface->Surface);
+            }
+        } break;
+
+        default: {
+            result = DefWindowProcA(hWnd, message, wParam, lParam);
+        } break;
     }
 
     return result;
@@ -107,8 +110,9 @@ b8 Win32_Surface_Create(Surface* outSurface, const char* name, u32 width, u32 he
     ShowWindow(data->Handle, SW_SHOW);
 
     *outSurface = (Surface){
+        .OnCloseCallback = nil,
+        ._Update = Win32_Surface_Update,
         ._PrivateData = data,
-        .Update = Win32_Surface_Update,
     };
 
     return TRUE;

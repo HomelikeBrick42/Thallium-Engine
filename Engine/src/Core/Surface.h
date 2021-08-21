@@ -5,10 +5,12 @@
 typedef struct Surface Surface;
 
 typedef void Surface_UpdateFunc(Surface* surface);
+typedef void Surface_OnCloseCallbackFunc(Surface* surface);
 
 typedef struct Surface {
+    Surface_OnCloseCallbackFunc* OnCloseCallback;
+    Surface_UpdateFunc* _Update;
     void* _PrivateData;
-    Surface_UpdateFunc* Update;
 } Surface;
 
 THALLIUM_API b8 Surface_Create(Surface* outSurface, const char* name, u32 width, u32 height);
@@ -19,5 +21,5 @@ THALLIUM_INLINE void Surface_Update(Surface* surface) {
         return;
     }
 
-    surface->Update(surface);
+    surface->_Update(surface);
 }
