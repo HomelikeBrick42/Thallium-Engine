@@ -197,9 +197,11 @@ void Win32_Surface_Destroy(Surface* surface) {
     if (data->Handle != nil) {
         if (data->DeviceContext != nil) {
             ReleaseDC(data->Handle, data->DeviceContext);
+            LogDebug(String_FromLiteral("Released Win32 Device Context"));
         }
 
         DestroyWindow(data->Handle);
+        LogDebug(String_FromLiteral("Destroyed Win32 Window"));
     }
 
     if (WindowCount > 0) {
@@ -207,6 +209,7 @@ void Win32_Surface_Destroy(Surface* surface) {
         if (data->Instance != nil) {
             if (WindowCount == 0) {
                 UnregisterClassA(WindowClassName, data->Instance);
+                LogDebug(String_FromLiteral("Destroyed Win32 Window Class"));
             }
         }
     }

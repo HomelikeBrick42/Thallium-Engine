@@ -43,9 +43,11 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
     if (data->vkGetInstanceProcAddr == nil) goto Error;
 #endif
 
+    LogDebug(String_FromLiteral("Getting Vulkan Functions"));
 #define VULKAN_FUNCTION(name) data->name = cast(PFN_ ## name) data->vkGetInstanceProcAddr(nil, #name); if (data->name == nil) goto Error;
     VULKAN_FUNCTIONS
 #undef VULKAN_FUNCTION
+    goto Error;
 
     const u32 RequiredAPIVersion = VK_API_VERSION_1_2;
 
@@ -86,6 +88,7 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
         LogDebug(String_FromLiteral("Created Vulkan Instance"));
     }
 
+    LogDebug(String_FromLiteral("Getting Vulkan Instance Functions"));
 #define VULKAN_INSTANCE_FUNCTION(name) data->name = cast(PFN_ ## name) data->vkGetInstanceProcAddr(data->Instance, #name); if (data->name == nil) goto Error;
     VULKAN_INSTANCE_FUNCTIONS
 #undef VULKAN_INSTANCE_FUNCTION
