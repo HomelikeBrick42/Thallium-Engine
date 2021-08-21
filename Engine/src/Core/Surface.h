@@ -7,9 +7,11 @@ typedef struct Surface Surface;
 
 typedef void Surface_DestroyFunc(Surface* surface);
 typedef void Surface_UpdateFunc(Surface* surface);
-typedef void Surface_OnCloseCallbackFunc(Surface* surface);
+
+typedef void Surface_OnCloseCallbackFunc(Surface* surface, void* userData);
 
 typedef struct Surface {
+    void* UserData;
     Surface_OnCloseCallbackFunc* OnCloseCallback;
     Surface_DestroyFunc* _Destroy;
     Surface_UpdateFunc* _Update;

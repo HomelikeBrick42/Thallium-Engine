@@ -23,7 +23,7 @@ LRESULT CALLBACK WindowMessageCallback(HWND hWnd, UINT message, WPARAM wParam, L
         case WM_CLOSE:
         case WM_DESTROY: {
             if (surface->Surface->OnCloseCallback != nil) {
-                surface->Surface->OnCloseCallback(surface->Surface);
+                surface->Surface->OnCloseCallback(surface->Surface, surface->Surface->UserData);
             }
         } break;
 
@@ -111,6 +111,7 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
     ShowWindow(data->Handle, SW_SHOW);
 
     *outSurface = (Surface){
+        .UserData = nil,
         .OnCloseCallback = nil,
         ._Destroy = Win32_Surface_Destroy,
         ._Update = Win32_Surface_Update,
