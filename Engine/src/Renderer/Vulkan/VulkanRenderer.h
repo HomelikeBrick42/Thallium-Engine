@@ -11,13 +11,18 @@
     VULKAN_FUNCTION(vkEnumerateInstanceExtensionProperties)
 
 #define VULKAN_INSTANCE_FUNCTIONS \
-    VULKAN_INSTANCE_FUNCTION(vkDestroyInstance)
+    VULKAN_INSTANCE_FUNCTION(vkDestroyInstance) \
+    VULKAN_INSTANCE_FUNCTION(vkCreateDebugUtilsMessengerEXT) \
+    VULKAN_INSTANCE_FUNCTION(vkDestroyDebugUtilsMessengerEXT)
 
 typedef struct VulkanRenderer {
     Renderer* Renderer;
 
     VkAllocationCallbacks* Allocator;
     VkInstance Instance;
+#if !defined(THALLIUM_RELEASE)
+    VkDebugUtilsMessengerEXT DebugMessenger;
+#endif
 
     PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
     
@@ -37,7 +42,7 @@ typedef struct VulkanRenderer {
 b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name);
 void VulkanRenderer_Destroy(Renderer* renderer);
 
-#if !defined(KEEP_FUNCTION_MACROS)
-    #undef FUNCTIONS
-    #undef INSTANCE_FUNCTIONS
+#if !defined(KEEP_VULKAN_FUNCTION_MACROS)
+    #undef VULKAN_FUNCTIONS
+    #undef VULKAN_INSTANCE_FUNCTIONS
 #endif
