@@ -1,41 +1,52 @@
 #include <Core/Defines.h>
 #include <Core/Surface.h>
+#include <Core/Logger.h>
 #include <Renderer/Renderer.h>
 
 #include <stdio.h>
 
+typedef struct GameData {
+    String Name;
+    b8 Running;
+    Surface Surface;
+    Renderer Renderer;
+} GameData;
+
 static void OnCloseCallback(Surface* surface) {
-    *(cast(b8*) surface->UserData) = FALSE;
+    GameData* data = (cast(GameData*) surface->UserData);
+    data->Running = FALSE;
 }
 
 static void OnKeyCallback(Surface* surface, KeyCode key, b8 pressed) {
-    printf("%s %s\n", String_ToTempCString(KeyCode_ToString(key)), pressed ? "Pressed" : "Released");
+    LogTrace(String_FromLiteral("%s %s"),
+        KeyCode_ToString(key),
+        pressed ? String_FromLiteral("Pressed") : String_FromLiteral("Released")
+    );
 }
 
 int main(int argc, char** argv) {
-    String name = String_FromLiteral("Test Game");
+    GameData data = {};
+    data.Name = String_FromLiteral("Test Game");
 
-    Surface surface = {};
-    if (!Surface_Create(&surface, name, 640, 480)) {
-        return -1;
-    }
-    
-    b8 running = TRUE;
-
-    surface.UserData = &running;
-    surface.OnCloseCallback = OnCloseCallback;
-    surface.OnKeyCallback = OnKeyCallback;
-
-    Renderer renderer = {};
-    if (!Renderer_Create(&renderer, RendererAPI_Vulkan, &surface, name)) {
+    if (!Surface_Create(&data.Surface, data.Name, 640, 480)) {
         return -1;
     }
 
-    while (running) {
-        Surface_Update(&surface);
+    data.Running = TRUE;
+
+    data.Surface.UserData = &data;
+    data.Surface.OnCloseCallback = OnCloseCallback;
+    data.Surface.OnKeyCallback = OnKeyCallback;
+
+    if (!Renderer_Create(&data.Renderer, RendererAPI_Vulkan, &data.Surface, data.Name)) {
+        return -1;
     }
 
-    Renderer_Destroy(&renderer);
-    Surface_Destroy(&surface);
+    while (data.Running) {
+        Surface_Update(&data.Surface);
+    }
+
+    Renderer_Destroy(&data.Renderer);
+    Surface_Destroy(&data.Surface);
     return 0;
 }

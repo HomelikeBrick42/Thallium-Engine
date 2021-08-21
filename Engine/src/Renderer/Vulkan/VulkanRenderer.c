@@ -2,6 +2,7 @@
 #include "Renderer/Vulkan/VulkanRenderer.h"
 
 #include "Core/Allocator.h"
+#include "Core/Logger.h"
 
 #if defined(THALLIUM_PLATFORM_WINDOWS)
     #include <Windows.h>    
@@ -82,6 +83,7 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
             .enabledExtensionCount = sizeof(InstanceExtensions) / sizeof(InstanceExtensions[0]),
             .ppEnabledExtensionNames = InstanceExtensions,
         }, data->Allocator, &data->Instance) != VK_SUCCESS || data->Instance == VK_NULL_HANDLE) goto Error;
+        LogDebug(String_FromLiteral("Created Vulkan Instance"));
     }
 
 #define VULKAN_INSTANCE_FUNCTION(name) data->name = cast(PFN_ ## name) data->vkGetInstanceProcAddr(data->Instance, #name); if (data->name == nil) goto Error;
@@ -93,21 +95,24 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
     if (data->vkCreateDebugUtilsMessengerEXT(data->Instance, &(VkDebugUtilsMessengerCreateInfoEXT){
         .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
         .messageSeverity =
-                VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
+              VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
             | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
             | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
             | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
         .messageType =
-                VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+              VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
             | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
             | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
         .pfnUserCallback = DebugMessengerCallback,
         .pUserData = data,
     }, data->Allocator, &data->DebugMessenger) != VK_SUCCESS || data->DebugMessenger == VK_NULL_HANDLE) goto Error;
+    LogDebug(String_FromLiteral("Created Vulkan Debug Messenger"));
 #endif
 
+    LogDebug(String_FromLiteral("Created Vulkan Renderer"));
     return TRUE;
 Error:
+    LogError(String_FromLiteral("Failed to create Vulkan Renderer!"));
     VulkanRenderer_Destroy(outRenderer);
     return FALSE;
 }
@@ -123,9 +128,11 @@ void VulkanRenderer_Destroy(Renderer* renderer) {
 #if !defined(THALLIUM_RELEASE)
         if (data->DebugMessenger != VK_NULL_HANDLE) {
             data->vkDestroyDebugUtilsMessengerEXT(data->Instance, data->DebugMessenger, data->Allocator);
+            LogDebug(String_FromLiteral("Destroyed Vulkan Debug Messenger"));
         }
 #endif
         data->vkDestroyInstance(data->Instance, data->Allocator);
+        LogDebug(String_FromLiteral("Destroyed Vulkan Instance"));
     }
 
 #if defined(THALLIUM_PLATFORM_WINDOWS)
@@ -135,6 +142,8 @@ void VulkanRenderer_Destroy(Renderer* renderer) {
     Deallocate(data);
 
     *renderer = (Renderer){};
+
+    LogDebug(String_FromLiteral("Destroyed Vulkan Renderer"));
 }
 
 #if !defined(THALLIUM_RELEASE)
@@ -146,25 +155,24 @@ static VkBool32 VKAPI_CALL DebugMessengerCallback(
     void* pUserData
 ) {
     (void)messageTypes;
-    (void)pCallbackData;
     (void)pUserData;
 
     switch (messageSeverity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
-            // LogTrace("Vulkan message: %s", pCallbackData->pMessage);
+            LogTrace(String_FromLiteral("Vulkan message: %s"), String_FromCString(pCallbackData->pMessage));
         } break;
 
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT: {
-            // LogDebug("Vulkan message: %s", pCallbackData->pMessage);
+            LogDebug(String_FromLiteral("Vulkan message: %s"), String_FromCString(pCallbackData->pMessage));
         } break;
 
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: {
-            // LogWarn("Vulkan message: %s", pCallbackData->pMessage);
+            LogWarn(String_FromLiteral("Vulkan message: %s"), String_FromCString(pCallbackData->pMessage));
         } break;
 
         default:
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT: {
-            // LogError("Vulkan message: %s", pCallbackData->pMessage);
+            LogError(String_FromLiteral("Vulkan message: %s"), String_FromCString(pCallbackData->pMessage));
         } break;
     }
 

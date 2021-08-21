@@ -17,7 +17,7 @@ void _Buffer_Destroy(void* buffer) {
 
 void* _Buffer_Push(void* buffer, void* value) {
     u64* header = (cast(u64*) buffer) - BufferElement_Count;
-    if (header[BufferElement_Length] <= header[BufferElement_Capacity]) {
+    if (header[BufferElement_Length] >= header[BufferElement_Capacity]) {
         u64 newCapacity = header[BufferElement_Capacity] == 0 ? 1 : header[BufferElement_Capacity] * 2;
         u64* newHeader = Allocate((BufferElement_Count * sizeof(u64)) + (newCapacity * header[BufferElement_ElementSize]));
         MemoryCopy(newHeader, header, (BufferElement_Count * sizeof(u64)) + (header[BufferElement_Length] * header[BufferElement_ElementSize]));

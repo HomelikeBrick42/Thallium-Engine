@@ -5,6 +5,7 @@
 #include "Platform/Win32/WindowsSurface.h"
 
 #include "Core/Allocator.h"
+#include "Core/Logger.h"
 
 static const char* WindowClassName = "ThalliumWindowClassName";
 static const DWORD WindowStyleEx = WS_EX_APPWINDOW;
@@ -115,10 +116,17 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
     data->Surface = outSurface;
 
     data->Instance = GetModuleHandleA(nil);
-    if (data->Instance == nil) {
-        Deallocate(data);
-        return FALSE;
-    }
+    if (data->Instance == nil) goto Error;
+    LogDebug(String_FromLiteral("Got Win32 Instance"));
+
+    *outSurface = (Surface){
+        .UserData = nil,
+        .OnCloseCallback = nil,
+        .OnKeyCallback = nil,
+        ._Destroy = Win32_Surface_Destroy,
+        ._Update = Win32_Surface_Update,
+        ._PrivateData = data,
+    };
 
     // TODO: Atomic check and increment for creating windows on multiple threads
     if (WindowCount == 0) {
@@ -135,10 +143,8 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
             .lpszMenuName = nil,
             .lpszClassName = WindowClassName,
             .hIconSm = nil,
-        }) == 0) {
-            Deallocate(data);
-            return FALSE;
-        }
+        }) == 0) goto Error;
+        LogDebug(String_FromLiteral("Created Win32 Window Class"));
     }
     WindowCount++;
 
@@ -147,10 +153,7 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
     windowRect.right = windowRect.left + width;
     windowRect.top = 100;
     windowRect.bottom = windowRect.top + height;
-    if (!AdjustWindowRectEx(&windowRect, WindowStyle, FALSE, WindowStyleEx)) {
-        Deallocate(data);
-        return FALSE;
-    }
+    if (!AdjustWindowRectEx(&windowRect, WindowStyle, FALSE, WindowStyleEx)) goto Error;
 
     char* nameCString = String_ToTempCString(name);
     data->Handle = CreateWindowExA(
@@ -167,29 +170,21 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
         data->Instance,
         data
     );
-    if (data->Handle == nil) {
-        Deallocate(data);
-        return FALSE;
-    }
+    if (data->Handle == nil) goto Error;
+    LogDebug(String_FromLiteral("Created Win32 Window"));
 
     data->DeviceContext = GetDC(data->Handle);
-    if (data->DeviceContext == nil) {
-        Deallocate(data);
-        return FALSE;
-    }
+    if (data->DeviceContext == nil) goto Error;
+    LogDebug(String_FromLiteral("Got Win32 Device Context"));
 
     ShowWindow(data->Handle, SW_SHOW);
 
-    *outSurface = (Surface){
-        .UserData = nil,
-        .OnCloseCallback = nil,
-        .OnKeyCallback = nil,
-        ._Destroy = Win32_Surface_Destroy,
-        ._Update = Win32_Surface_Update,
-        ._PrivateData = data,
-    };
-
+    LogDebug(String_FromLiteral("Created Win32 Surface"));
     return TRUE;
+Error:
+    LogError(String_FromLiteral("Failed to create Win32 Surface!"));
+    Win32_Surface_Destroy(outSurface);
+    return FALSE;
 }
 
 void Win32_Surface_Destroy(Surface* surface) {
@@ -218,6 +213,8 @@ void Win32_Surface_Destroy(Surface* surface) {
 
     Deallocate(data);
     *surface = (Surface){};
+
+    LogDebug(String_FromLiteral("Destroyed Win32 Surface"));
 }
 
 void Win32_Surface_Update(Surface* surface) {
