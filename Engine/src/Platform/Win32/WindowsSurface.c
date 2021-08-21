@@ -1,7 +1,6 @@
 #include "Platform/Win32/WindowsSurface.h"
 
-// TODO: Custom allocator
-#include <stdlib.h>
+#include "Core/Allocator.h"
 
 static const char* WindowClassName = "ThalliumWindowClassName";
 static const DWORD WindowStyleEx = WS_EX_APPWINDOW;
@@ -38,13 +37,13 @@ b8 Win32_Surface_Create(Surface* outSurface, const char* name, u32 width, u32 he
         return FALSE;
     }
 
-    Win32_Surface* data = malloc(sizeof(Win32_Surface));
+    Win32_Surface* data = Allocate(sizeof(Win32_Surface));
     *data = (Win32_Surface){};
     data->Surface = outSurface;
 
     data->Instance = GetModuleHandleA(nil);
     if (data->Instance == nil) {
-        free(data);
+        Deallocate(data);
         return FALSE;
     }
 
@@ -64,7 +63,7 @@ b8 Win32_Surface_Create(Surface* outSurface, const char* name, u32 width, u32 he
             .lpszClassName = WindowClassName,
             .hIconSm = nil,
         }) == 0) {
-            free(data);
+            Deallocate(data);
             return FALSE;
         }
     }
@@ -76,7 +75,7 @@ b8 Win32_Surface_Create(Surface* outSurface, const char* name, u32 width, u32 he
     windowRect.top = 100;
     windowRect.bottom = windowRect.top + height;
     if (!AdjustWindowRectEx(&windowRect, WindowStyle, FALSE, WindowStyleEx)) {
-        free(data);
+        Deallocate(data);
         return FALSE;
     }
 
@@ -95,13 +94,13 @@ b8 Win32_Surface_Create(Surface* outSurface, const char* name, u32 width, u32 he
         data
     );
     if (data->Handle == nil) {
-        free(data);
+        Deallocate(data);
         return FALSE;
     }
 
     data->DeviceContext = GetDC(data->Handle);
     if (data->DeviceContext == nil) {
-        free(data);
+        Deallocate(data);
         return FALSE;
     }
 
@@ -139,7 +138,7 @@ void Win32_Surface_Destroy(Surface* surface) {
         }
     }
 
-    free(data);
+    Deallocate(data);
     *surface = (Surface){};
 }
 
