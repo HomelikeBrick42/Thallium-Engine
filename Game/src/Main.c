@@ -9,7 +9,7 @@ static void OnCloseCallback(Surface* surface) {
 
 int main(int argc, char** argv) {
     Surface surface = {};
-    if (!Surface_Create(&surface, "Surface", 640, 480)) {
+    if (!Surface_Create(&surface, String_FromLiteral("Surface"), 640, 480)) {
         return -1;
     }
 

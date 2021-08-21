@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Defines.h"
+#include "Containers/String.h"
 
 typedef struct Surface Surface;
 
@@ -15,7 +16,7 @@ typedef struct Surface {
     void* _PrivateData;
 } Surface;
 
-THALLIUM_API b8 Surface_Create(Surface* outSurface, const char* name, u32 width, u32 height);
+THALLIUM_API b8 Surface_Create(Surface* outSurface, String name, u32 width, u32 height);
 
 THALLIUM_INLINE void Surface_Destroy(Surface* surface) {
     if (surface == nil) {

@@ -35,7 +35,7 @@ LRESULT CALLBACK WindowMessageCallback(HWND hWnd, UINT message, WPARAM wParam, L
     return result;
 }
 
-b8 Win32_Surface_Create(Surface* outSurface, const char* name, u32 width, u32 height) {
+b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height) {
     if (outSurface == nil) {
         return FALSE;
     }
@@ -82,10 +82,11 @@ b8 Win32_Surface_Create(Surface* outSurface, const char* name, u32 width, u32 he
         return FALSE;
     }
 
+    char* nameCString = String_ToTempCString(name);
     data->Handle = CreateWindowExA(
         WindowStyleEx,
         WindowClassName,
-        name,
+        nameCString,
         WindowStyle,
         CW_USEDEFAULT,
         CW_USEDEFAULT,

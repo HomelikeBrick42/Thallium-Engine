@@ -4,7 +4,7 @@
     #include "Platform/Win32/WindowsSurface.h"
 #endif
 
-b8 Surface_Create(Surface* outSurface, const char* name, u32 width, u32 height) {
+b8 Surface_Create(Surface* outSurface, String name, u32 width, u32 height) {
 #if THALLIUM_PLATFORM_WINDOWS
     return Win32_Surface_Create(outSurface, name, width, height);
 #endif
