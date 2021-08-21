@@ -30,4 +30,21 @@ THALLIUM_INLINE String String_FromCString(const char* cstring) {
     return result;
 }
 
+THALLIUM_INLINE b8 String_Equal(String a, String b) {
+    if (a.Length != b.Length) {
+        return FALSE;
+    }
+
+    if (a.Data == b.Data) {
+        return TRUE;
+    }
+
+    for (u64 i = 0; i < a.Length; i++) {
+        if (a.Data[i] != b.Data[i]) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
 THALLIUM_API char* String_ToTempCString(String s);
