@@ -209,7 +209,6 @@ void VulkanRenderer_Destroy(Renderer* renderer) {
 }
 
 #if !defined(THALLIUM_RELEASE)
-// TODO:
 static VkBool32 VKAPI_CALL DebugMessengerCallback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageTypes,
