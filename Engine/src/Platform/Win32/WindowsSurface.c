@@ -1,3 +1,7 @@
+#include "Core/Defines.h"
+
+#if defined(THALLIUM_PLATFORM_WINDOWS)
+
 #include "Platform/Win32/WindowsSurface.h"
 
 #include "Core/Allocator.h"
@@ -229,3 +233,5 @@ void Win32_Surface_Update(Surface* surface) {
         DispatchMessageA(&message);
     }
 }
+
+#endif
