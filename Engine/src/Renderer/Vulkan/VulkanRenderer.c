@@ -47,7 +47,6 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
 #define VULKAN_FUNCTION(name) data->name = cast(PFN_ ## name) data->vkGetInstanceProcAddr(nil, #name); if (data->name == nil) goto Error;
     VULKAN_FUNCTIONS
 #undef VULKAN_FUNCTION
-    goto Error;
 
     const u32 RequiredAPIVersion = VK_API_VERSION_1_2;
 
