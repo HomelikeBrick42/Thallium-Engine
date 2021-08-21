@@ -21,7 +21,7 @@ typedef struct Surface {
 THALLIUM_API b8 Surface_Create(Surface* outSurface, String name, u32 width, u32 height);
 
 THALLIUM_INLINE void Surface_Destroy(Surface* surface) {
-    if (surface == nil) {
+    if (surface == nil || surface->_Destroy == nil) {
         return;
     }
 
@@ -29,7 +29,7 @@ THALLIUM_INLINE void Surface_Destroy(Surface* surface) {
 }
 
 THALLIUM_INLINE void Surface_Update(Surface* surface) {
-    if (surface == nil) {
+    if (surface == nil || surface->_Update == nil) {
         return;
     }
 
