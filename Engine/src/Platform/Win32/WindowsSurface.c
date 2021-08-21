@@ -103,6 +103,10 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
     }
 
     Win32_Surface* data = Allocate(sizeof(Win32_Surface));
+    if (data == nil) {
+        return FALSE;
+    }
+
     *data = (Win32_Surface){};
     data->Surface = outSurface;
 

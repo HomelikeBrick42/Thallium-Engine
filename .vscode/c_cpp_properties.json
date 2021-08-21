@@ -10,7 +10,8 @@
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
-                "THALLIUM_EXPORT"
+                "THALLIUM_EXPORT",
+                "VK_NO_PROTOTYPES"
             ],
             "windowsSdkVersion": "10.0.18362.0",
             "compilerPath": "C:\\Program Files\\LLVM\\bin\\clang.exe",
