@@ -9,9 +9,3 @@ b8 Surface_Create(Surface* outSurface, const char* name, u32 width, u32 height) 
     return Win32_Surface_Create(outSurface, name, width, height);
 #endif
 }
-
-void Surface_Destroy(Surface* surface) {
-#if THALLIUM_PLATFORM_WINDOWS
-    Win32_Surface_Destroy(surface);
-#endif
-}

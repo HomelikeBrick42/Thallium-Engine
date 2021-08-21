@@ -111,6 +111,7 @@ b8 Win32_Surface_Create(Surface* outSurface, const char* name, u32 width, u32 he
 
     *outSurface = (Surface){
         .OnCloseCallback = nil,
+        ._Destroy = Win32_Surface_Destroy,
         ._Update = Win32_Surface_Update,
         ._PrivateData = data,
     };
