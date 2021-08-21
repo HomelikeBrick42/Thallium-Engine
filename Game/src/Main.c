@@ -1,8 +1,14 @@
 #include <Core/Defines.h>
 #include <Core/Surface.h>
 
-static void OnCloseCallback(Surface* surface, void* userData) {
-    *(cast(b8*) userData) = FALSE;
+#include <stdio.h>
+
+static void OnCloseCallback(Surface* surface) {
+    *(cast(b8*) surface->UserData) = FALSE;
+}
+
+static void OnKeyCallback(Surface* surface, KeyCode key, b8 pressed) {
+    printf("%s %s\n", String_ToTempCString(KeyCode_ToString(key)), pressed ? "Pressed" : "Released");
 }
 
 int main(int argc, char** argv) {
@@ -15,6 +21,7 @@ int main(int argc, char** argv) {
 
     surface.UserData = &running;
     surface.OnCloseCallback = OnCloseCallback;
+    surface.OnKeyCallback = OnKeyCallback;
 
     while (running) {
         Surface_Update(&surface);
