@@ -15,6 +15,10 @@ void Deallocate(void* block) {
     free(block);
 }
 
+void MemoryCopy(void* dest, void* src, u64 size) {
+    memmove(dest, src, size);
+}
+
 // TODO: Make this per-thread
 #define TempAllocatorBlockSize (1024 * 1024 * 4)
 static u8 TempAllocatorBlock[TempAllocatorBlockSize];
