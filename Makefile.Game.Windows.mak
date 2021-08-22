@@ -4,7 +4,7 @@ OBJ_DIR := obj
 
 ASSEMBLY := Game
 EXTENSION := .exe
-COMPILER_FLAGS := -g -Wno-missing-braces -fdeclspec #-fPIC
+COMPILER_FLAGS := -g -MD -Wno-missing-braces -fdeclspec #-fPIC
 INCLUDE_FLAGS := -IEngine\src -IGame\src 
 LINKER_FLAGS := -g -lEngine.lib -L$(OBJ_DIR)\Engine -L$(BUILD_DIR) #-Wl,-rpath,.
 DEFINES := -D_DEBUG -DTHALLIUM_IMPORT
@@ -41,3 +41,5 @@ clean: # Clean build directory
 $(OBJ_DIR)/%.c.o: %.c # Compile .c to .c.o object
 	@echo   $<...
 	@clang $< $(COMPILER_FLAGS) -c -o $@ $(DEFINES) $(INCLUDE_FLAGS)
+
+-include $(OBJ_FILES:.o=.d)
