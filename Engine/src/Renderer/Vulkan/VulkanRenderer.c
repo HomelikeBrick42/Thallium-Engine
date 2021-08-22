@@ -39,7 +39,7 @@ VkBool32 VKAPI_CALL DebugMessengerCallback(
 b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
 #define VK_CHECK(x) if ((x) != VK_SUCCESS) goto Error
 
-    LogDebug(String_FromLiteral("Creating Vulkan Renderer"));
+    LogInfo(String_FromLiteral("Creating Vulkan Renderer"));
 
     if (outRenderer == nil || surface == nil) {
         LogError(String_FromLiteral("Failed to create Vulkan Renderer!\n"));
@@ -391,11 +391,11 @@ static VkBool32 VKAPI_CALL DebugMessengerCallback(
 
     switch (messageSeverity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
-            // LogTrace(String_FromLiteral("Vulkan Trace: %s"), String_FromCString(pCallbackData->pMessage));
+            // LogTrace(String_FromLiteral("Vulkan Verbose: %s"), String_FromCString(pCallbackData->pMessage));
         } break;
 
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT: {
-            // LogTrace(String_FromLiteral("Vulkan Debug: %s"), String_FromCString(pCallbackData->pMessage));
+            // LogInfo(String_FromLiteral("Vulkan Info: %s"), String_FromCString(pCallbackData->pMessage));
         } break;
 
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: {

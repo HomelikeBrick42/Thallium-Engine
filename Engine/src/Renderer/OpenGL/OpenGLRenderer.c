@@ -47,11 +47,11 @@ static void OpenGLMessageCallback(
         } break;
 
         case GL_DEBUG_SEVERITY_LOW: {
-            LogDebug(String_FromLiteral("OpenGL Message: %s"), String_FromCString(message));
+            LogInfo(String_FromLiteral("OpenGL Message: %s"), String_FromCString(message));
         } break;
 
         case GL_DEBUG_SEVERITY_NOTIFICATION: {
-            LogTrace(String_FromLiteral("OpenGL Message: %s"), String_FromCString(message));
+            LogDebug(String_FromLiteral("OpenGL Message: %s"), String_FromCString(message));
         } break;
 
         default: {
@@ -63,7 +63,7 @@ static void OpenGLMessageCallback(
 b8 OpenGLRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
     (void)name;
 
-    LogDebug(String_FromLiteral("Creating OpenGL Renderer"));
+    LogInfo(String_FromLiteral("Creating OpenGL Renderer"));
 
     if (outRenderer == nil || surface == nil) {
         LogError(String_FromLiteral("Failed to create OpenGL Renderer!\n"));
@@ -164,7 +164,7 @@ Error:
 }
 
 void OpenGLRenderer_Destroy(Renderer* renderer) {
-    LogDebug(String_FromLiteral("Destroying Vulkan Renderer"));
+    LogInfo(String_FromLiteral("Destroying OpenGL Renderer"));
 
     if (renderer == nil) {
         return;
@@ -189,7 +189,7 @@ void OpenGLRenderer_Destroy(Renderer* renderer) {
 
     *renderer = (Renderer){};
 
-    LogDebug(String_FromLiteral("Destroyed Vulkan Renderer\n"));
+    LogDebug(String_FromLiteral("Destroyed OpenGL Renderer\n"));
 }
 
 void OpenGLRenderer_OnSurfaceResize(Renderer* renderer, u32 width, u32 height) {

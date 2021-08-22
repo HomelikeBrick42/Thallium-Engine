@@ -81,6 +81,7 @@ void Logger_Log(LogLevel level, String format, ...) {
     WORD newColor =
         (level == LogLevel_Trace) ? (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY) :
         (level == LogLevel_Debug) ? (FOREGROUND_BLUE | FOREGROUND_INTENSITY) :
+        (level == LogLevel_Info) ? (FOREGROUND_GREEN | FOREGROUND_INTENSITY) :
         (level == LogLevel_Warn) ? (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY) :
         (level == LogLevel_Error) ? (FOREGROUND_RED | FOREGROUND_INTENSITY) :
         (level == LogLevel_Fatal) ? (FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY) : 0;

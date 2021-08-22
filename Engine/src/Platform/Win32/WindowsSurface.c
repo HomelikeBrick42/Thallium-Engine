@@ -125,8 +125,8 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
     if (data == nil) {
         return FALSE;
     }
-    
-    LogDebug(String_FromLiteral("Creating Win32 Surface"));
+
+    LogInfo(String_FromLiteral("Creating Win32 Surface"));
 
     *data = (Win32_Surface){};
     data->Surface = outSurface;
@@ -213,7 +213,7 @@ void Win32_Surface_Destroy(Surface* surface) {
         return;
     }
 
-    LogDebug(String_FromLiteral("Destroying Win32 Surface"));
+    LogInfo(String_FromLiteral("Destroying Win32 Surface"));
 
     Win32_Surface* data = surface->_PrivateData;
 
