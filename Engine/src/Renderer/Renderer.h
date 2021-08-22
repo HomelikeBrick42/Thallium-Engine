@@ -7,6 +7,7 @@
 
 typedef enum RendererAPI {
     RendererAPI_Vulkan,
+    RendererAPI_OpenGL,
 } RendererAPI;
 
 typedef struct Renderer Renderer;

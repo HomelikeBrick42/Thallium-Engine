@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     data.Surface.OnKeyCallback = OnKeyCallback;
     data.Surface.OnResizeCallback = OnResizeCallback;
 
-    if (!Renderer_Create(&data.Renderer, RendererAPI_Vulkan, &data.Surface, data.Name)) {
+    if (!Renderer_Create(&data.Renderer, RendererAPI_OpenGL, &data.Surface, data.Name)) {
         return -1;
     }
 

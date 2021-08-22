@@ -6,7 +6,7 @@ ASSEMBLY := Engine
 EXTENSION := .dll
 COMPILER_FLAGS := -Wall -Wextra -Werror -g -MD -fdeclspec #-fPIC
 INCLUDE_FLAGS := -IEngine\src -I$(VULKAN_SDK)\include
-LINKER_FLAGS := -g -shared -luser32 -L$(OBJ_DIR)\Engine
+LINKER_FLAGS := -g -shared -luser32 -lgdi32 -L$(OBJ_DIR)\Engine
 DEFINES := -D_DEBUG -DTHALLIUM_EXPORT -D_CRT_SECURE_NO_WARNINGS -DVK_NO_PROTOTYPES
 
 # Make does not offer a recursive wildcard function, so here's one:

@@ -39,16 +39,18 @@ VkBool32 VKAPI_CALL DebugMessengerCallback(
 b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
 #define VK_CHECK(x) if ((x) != VK_SUCCESS) goto Error
 
-    if (outRenderer == nil) {
+    LogDebug(String_FromLiteral("Creating Vulkan Renderer"));
+
+    if (outRenderer == nil || surface == nil) {
+        LogError(String_FromLiteral("Failed to create Vulkan Renderer!\n"));
         return FALSE;
     }
 
     VulkanRenderer* data = Allocate(sizeof(VulkanRenderer));
     if (data == nil) {
+        LogError(String_FromLiteral("Failed to create Vulkan Renderer!\n"));
         return FALSE;
     }
-
-    LogDebug(String_FromLiteral("Creating Vulkan Renderer"));
 
     data->Renderer = outRenderer;
 
