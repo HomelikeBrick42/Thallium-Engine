@@ -65,14 +65,14 @@ int main(int argc, char** argv) {
     while (data.Running) {
         if (Renderer_BeginFrame(&data.RendererVulkan, 0.0f)) {
             if (!Renderer_EndFrame(&data.RendererVulkan, 0.0f)) {
-                LogFatal(String_FromLiteral("Failed to end frame. Shutting Down..."));
+                LogFatal(String_FromLiteral("Vulkan Renderer failed to end frame. Shutting Down..."));
                 return -1;
             }
         }
 
         if (Renderer_BeginFrame(&data.RendererOpenGL, 0.0f)) {
             if (!Renderer_EndFrame(&data.RendererOpenGL, 0.0f)) {
-                LogFatal(String_FromLiteral("Failed to end frame. Shutting Down..."));
+                LogFatal(String_FromLiteral("OpenGL Renderer failed to end frame. Shutting Down..."));
                 return -1;
             }
         }

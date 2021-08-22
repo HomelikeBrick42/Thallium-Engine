@@ -21,6 +21,45 @@ static b8 MakeCurrent(OpenGLRenderer* data) {
 }
 #endif
 
+static void OpenGLMessageCallback(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar *message,
+    const void *userParam)
+{
+    (void)source;
+    (void)type;
+    (void)id;
+    (void)length;
+    (void)userParam;
+
+    switch (severity)
+    {
+        case GL_DEBUG_SEVERITY_HIGH: {
+            LogError(String_FromLiteral("OpenGL Message: %s"), String_FromCString(message));
+        } break;
+
+        case GL_DEBUG_SEVERITY_MEDIUM: {
+            LogWarn(String_FromLiteral("OpenGL Message: %s"), String_FromCString(message));
+        } break;
+
+        case GL_DEBUG_SEVERITY_LOW: {
+            LogDebug(String_FromLiteral("OpenGL Message: %s"), String_FromCString(message));
+        } break;
+
+        case GL_DEBUG_SEVERITY_NOTIFICATION: {
+            LogTrace(String_FromLiteral("OpenGL Message: %s"), String_FromCString(message));
+        } break;
+
+        default: {
+            LogFatal(String_FromLiteral("OpenGL Message: %s"), String_FromCString(message));
+        } break;
+    }
+}
+
 b8 OpenGLRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
     (void)name;
 
@@ -102,6 +141,18 @@ b8 OpenGLRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
     OPENGL_FUNCTIONS
 #undef OPENGL_FUNCTION
     LogDebug(String_FromLiteral("  Loaded OpenGL Functions"));
+#endif
+
+#if !defined(THALLIUM_RELEASE)
+    LogDebug(String_FromLiteral("  Enabling OpenGL Debug Messenger"));
+
+    data->glEnable(GL_DEBUG_OUTPUT);
+    data->glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    data->glDebugMessageCallback(OpenGLMessageCallback, data);
+
+	data->glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nil, GL_FALSE);
+
+    LogDebug(String_FromLiteral("  Enabled OpenGL Debug Messenger"));
 #endif
 
     LogDebug(String_FromLiteral("Created OpenGL Renderer\n"));
