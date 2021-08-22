@@ -3,8 +3,6 @@
 #include <Core/Logger.h>
 #include <Renderer/Renderer.h>
 
-#include <stdio.h>
-
 typedef struct GameData {
     String Name;
     b8 Running;
