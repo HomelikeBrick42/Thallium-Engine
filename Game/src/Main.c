@@ -13,7 +13,7 @@ typedef struct GameData {
 } GameData;
 
 static void OnCloseCallback(Surface* surface) {
-    GameData* data = (cast(GameData*) surface->UserData);
+    GameData* data = cast(GameData*) surface->UserData;
     data->Running = FALSE;
 }
 
