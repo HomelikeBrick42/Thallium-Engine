@@ -111,13 +111,16 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
     if (data == nil) {
         return FALSE;
     }
+    
+    LogDebug(String_FromLiteral("Creating Win32 Surface"));
 
     *data = (Win32_Surface){};
     data->Surface = outSurface;
 
+    LogDebug(String_FromLiteral("  Getting Win32 Instance"));
     data->Instance = GetModuleHandleA(nil);
     if (data->Instance == nil) goto Error;
-    LogDebug(String_FromLiteral("Got Win32 Instance"));
+    LogDebug(String_FromLiteral("  Got Win32 Instance"));
 
     *outSurface = (Surface){
         .UserData = nil,
@@ -130,6 +133,7 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
 
     // TODO: Atomic check and increment for creating windows on multiple threads
     if (WindowCount == 0) {
+        LogDebug(String_FromLiteral("  Creating Win32 Window Class"));
         if (RegisterClassExA(&(WNDCLASSEXA){
             .cbSize = sizeof(WNDCLASSEXA),
             .style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW,
@@ -144,7 +148,7 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
             .lpszClassName = WindowClassName,
             .hIconSm = nil,
         }) == 0) goto Error;
-        LogDebug(String_FromLiteral("Created Win32 Window Class"));
+        LogDebug(String_FromLiteral("  Created Win32 Window Class"));
     }
     WindowCount++;
 
@@ -155,6 +159,7 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
     windowRect.bottom = windowRect.top + height;
     if (!AdjustWindowRectEx(&windowRect, WindowStyle, FALSE, WindowStyleEx)) goto Error;
 
+    LogDebug(String_FromLiteral("  Creating Win32 Window"));
     char* nameCString = String_ToTempCString(name);
     data->Handle = CreateWindowExA(
         WindowStyleEx,
@@ -171,18 +176,19 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
         data
     );
     if (data->Handle == nil) goto Error;
-    LogDebug(String_FromLiteral("Created Win32 Window"));
+    LogDebug(String_FromLiteral("  Created Win32 Window"));
 
+    LogDebug(String_FromLiteral("  Getting Win32 Device Context"));
     data->DeviceContext = GetDC(data->Handle);
     if (data->DeviceContext == nil) goto Error;
-    LogDebug(String_FromLiteral("Got Win32 Device Context"));
+    LogDebug(String_FromLiteral("  Got Win32 Device Context"));
 
     ShowWindow(data->Handle, SW_SHOW);
 
-    LogDebug(String_FromLiteral("Created Win32 Surface"));
+    LogDebug(String_FromLiteral("Created Win32 Surface\n"));
     return TRUE;
 Error:
-    LogError(String_FromLiteral("Failed to create Win32 Surface!"));
+    LogError(String_FromLiteral("Failed to create Win32 Surface!\n"));
     Win32_Surface_Destroy(outSurface);
     return FALSE;
 }
@@ -192,24 +198,30 @@ void Win32_Surface_Destroy(Surface* surface) {
         return;
     }
 
+    LogDebug(String_FromLiteral("Destroying Win32 Surface"));
+
     Win32_Surface* data = surface->_PrivateData;
 
     if (data->Handle != nil) {
+        LogDebug(String_FromLiteral("  Destroying Win32 Window"));
+
         if (data->DeviceContext != nil) {
+            LogDebug(String_FromLiteral("    Releasing Win32 Device Context"));
             ReleaseDC(data->Handle, data->DeviceContext);
-            LogDebug(String_FromLiteral("Released Win32 Device Context"));
+            LogDebug(String_FromLiteral("    Released Win32 Device Context"));
         }
 
         DestroyWindow(data->Handle);
-        LogDebug(String_FromLiteral("Destroyed Win32 Window"));
+        LogDebug(String_FromLiteral("  Destroyed Win32 Window"));
     }
 
     if (WindowCount > 0) {
         WindowCount--;
         if (data->Instance != nil) {
             if (WindowCount == 0) {
+                LogDebug(String_FromLiteral("  Destroying Win32 Window Class"));
                 UnregisterClassA(WindowClassName, data->Instance);
-                LogDebug(String_FromLiteral("Destroyed Win32 Window Class"));
+                LogDebug(String_FromLiteral("  Destroyed Win32 Window Class"));
             }
         }
     }
@@ -217,7 +229,7 @@ void Win32_Surface_Destroy(Surface* surface) {
     Deallocate(data);
     *surface = (Surface){};
 
-    LogDebug(String_FromLiteral("Destroyed Win32 Surface"));
+    LogDebug(String_FromLiteral("Destroyed Win32 Surface\n"));
 }
 
 void Win32_Surface_Update(Surface* surface) {

@@ -48,6 +48,8 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
         return FALSE;
     }
 
+    LogDebug(String_FromLiteral("Creating Vulkan Renderer"));
+
     data->Renderer = outRenderer;
 
     *outRenderer = (Renderer){
@@ -57,26 +59,36 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
     };
 
 #if defined(THALLIUM_PLATFORM_WINDOWS)
+    LogDebug(String_FromLiteral("  Loading 'vulkan-1.dll'"));
     data->VulkanDllHandle = LoadLibraryA("vulkan-1.dll");
     if (data->VulkanDllHandle == nil) goto Error;
+    LogDebug(String_FromLiteral("  Loaded 'vulkan-1.dll'"));
 
+    LogDebug(String_FromLiteral("  Loading 'vkGetInstanceProcAddr'"));
     data->vkGetInstanceProcAddr = cast(PFN_vkGetInstanceProcAddr) GetProcAddress(data->VulkanDllHandle, "vkGetInstanceProcAddr");
     if (data->vkGetInstanceProcAddr == nil) goto Error;
+    LogDebug(String_FromLiteral("  Loaded 'vkGetInstanceProcAddr'"));
 #endif
 
-#define VULKAN_FUNCTION(name) data->name = cast(PFN_ ## name) data->vkGetInstanceProcAddr(nil, #name); if (data->name == nil) { LogDebug(String_FromLiteral("Failed to get Vulkan Function '" #name "'")); goto Error; }
+    LogDebug(String_FromLiteral("  Getting Vulkan Functions"));
+#define VULKAN_FUNCTION(name) data->name = cast(PFN_ ## name) data->vkGetInstanceProcAddr(nil, #name); if (data->name == nil) { LogDebug(String_FromLiteral("    Failed to get Vulkan Function '" #name "'")); goto Error; }
     VULKAN_FUNCTIONS
 #undef VULKAN_FUNCTION
-    LogDebug(String_FromLiteral("Got Vulkan Functions"));
+    LogDebug(String_FromLiteral("  Got Vulkan Functions"));
 
     const u32 RequiredAPIVersion = VK_API_VERSION_1_2;
 
     data->Allocator = nil;
 
     {
+        LogDebug(String_FromLiteral("  Creating Vulkan Instance"));
+
+        LogDebug(String_FromLiteral("    Checking Vulkan Version"));
         u32 version = 0;
         if (data->vkEnumerateInstanceVersion(&version) != VK_SUCCESS || version < RequiredAPIVersion) goto Error;
+        LogDebug(String_FromLiteral("    Got Required Vulkan Version"));
 
+        LogDebug(String_FromLiteral("    Checking Required Vulkan Layers"));
         {
             u32 availableLayerCount = 0;
             VK_CHECK(data->vkEnumerateInstanceLayerProperties(&availableLayerCount, nil));
@@ -97,14 +109,15 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
                 }
 
                 if (!found) {
-                    LogError(String_FromLiteral("Failed to find vulkan instance layer '%s'"), layerString);
+                    LogError(String_FromLiteral("      Failed to find vulkan instance layer '%s'"), layerString);
                     hasLayers = FALSE;
                 }
             }
             if (!hasLayers) goto Error;
         }
-        LogDebug(String_FromLiteral("Found all required Vulkan Instance Layers"));
+        LogDebug(String_FromLiteral("    Found all required Vulkan Instance Layers"));
 
+        LogDebug(String_FromLiteral("    Checking Required Vulkan Extentions"));
         {
             u32 availableExtensionCount = 0;
             VK_CHECK(data->vkEnumerateInstanceExtensionProperties(nil, &availableExtensionCount, nil));
@@ -125,13 +138,13 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
                 }
 
                 if (!found) {
-                    LogError(String_FromCString("Failed to find vulkan instance extension '%s'"), extensionString);
+                    LogError(String_FromCString("      Failed to find vulkan instance extension '%s'"), extensionString);
                     hasExtensions = FALSE;
                 }
             }
             if (!hasExtensions) goto Error;
         }
-        LogDebug(String_FromLiteral("Found all required Vulkan Instance Extensions"));
+        LogDebug(String_FromLiteral("    Found all required Vulkan Instance Extensions"));
 
         data->Instance = VK_NULL_HANDLE;
         if (data->vkCreateInstance(&(VkInstanceCreateInfo){
@@ -149,15 +162,17 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
             .enabledExtensionCount = sizeof(InstanceExtensions) / sizeof(InstanceExtensions[0]),
             .ppEnabledExtensionNames = InstanceExtensions,
         }, data->Allocator, &data->Instance) != VK_SUCCESS || data->Instance == VK_NULL_HANDLE) goto Error;
-        LogDebug(String_FromLiteral("Created Vulkan Instance"));
+        LogDebug(String_FromLiteral("  Created Vulkan Instance"));
     }
 
-#define VULKAN_INSTANCE_FUNCTION(name) data->name = cast(PFN_ ## name) data->vkGetInstanceProcAddr(data->Instance, #name); if (data->name == nil) { LogDebug(String_FromLiteral("Failed to get Vulkan Instance Function '" #name "'")); goto Error; }
+    LogDebug(String_FromLiteral("  Getting Vulkan Instance Functions"));
+#define VULKAN_INSTANCE_FUNCTION(name) data->name = cast(PFN_ ## name) data->vkGetInstanceProcAddr(data->Instance, #name); if (data->name == nil) { LogDebug(String_FromLiteral("    Failed to get Vulkan Instance Function '" #name "'")); goto Error; }
     VULKAN_INSTANCE_FUNCTIONS
 #undef VULKAN_INSTANCE_FUNCTION
-    LogDebug(String_FromLiteral("Got Vulkan Instance Functions"));
+    LogDebug(String_FromLiteral("  Got Vulkan Instance Functions"));
 
 #if !defined(THALLIUM_RELEASE)
+    LogDebug(String_FromLiteral("  Creating Vulkan Debug Messenger"));
     data->DebugMessenger = VK_NULL_HANDLE;
     if (data->vkCreateDebugUtilsMessengerEXT(data->Instance, &(VkDebugUtilsMessengerCreateInfoEXT){
         .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
@@ -173,9 +188,10 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
         .pfnUserCallback = DebugMessengerCallback,
         .pUserData = data,
     }, data->Allocator, &data->DebugMessenger) != VK_SUCCESS || data->DebugMessenger == VK_NULL_HANDLE) goto Error;
-    LogDebug(String_FromLiteral("Created Vulkan Debug Messenger"));
+    LogDebug(String_FromLiteral("  Created Vulkan Debug Messenger"));
 #endif
 
+    LogDebug(String_FromLiteral("  Creating Vulkan Surface"));
     data->Surface = VK_NULL_HANDLE;
 #if defined(THALLIUM_PLATFORM_WINDOWS)
     if (data->vkCreateWin32SurfaceKHR(data->Instance, &(VkWin32SurfaceCreateInfoKHR){
@@ -184,8 +200,9 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
         .hwnd = (cast(Win32_Surface*) surface->_PrivateData)->Handle,
     }, data->Allocator, &data->Surface) != VK_SUCCESS || data->Surface == VK_NULL_HANDLE) goto Error;
 #endif
-    LogDebug(String_FromLiteral("Created Vulkan Surface"));
+    LogDebug(String_FromLiteral("  Created Vulkan Surface"));
 
+    LogDebug(String_FromLiteral("  Choosing Physical Device"));
     {
         u32 physicalDevicesCount = 0;
         VK_CHECK(data->vkEnumeratePhysicalDevices(data->Instance, &physicalDevicesCount, nil));
@@ -201,14 +218,15 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
             data->vkGetPhysicalDeviceProperties(physicalDevices[i], &physicalDevice.Properties);
             physicalDevice.DeviceName = String_FromCString(physicalDevice.Properties.deviceName);
 
-            LogDebug(String_FromLiteral("Checking device '%s'..."), physicalDevice.DeviceName);
+            LogDebug(String_FromLiteral("    Checking Physical Device '%s'"), physicalDevice.DeviceName);
 
             if (physicalDevice.Properties.apiVersion < RequiredAPIVersion) {
-                LogWarn(String_FromLiteral("Physical Device '%s' does not have the required api version!"), physicalDevice.DeviceName);
+                LogWarn(String_FromLiteral("      Physical Device '%s' does not have the required api version!"), physicalDevice.DeviceName);
                 continue;
             }
-            LogDebug(String_FromLiteral("Physical Device '%s' has the required api version"), physicalDevice.DeviceName);
+            LogDebug(String_FromLiteral("      Physical Device '%s' has the required api version"), physicalDevice.DeviceName);
 
+            LogDebug(String_FromLiteral("      Checking Physical Device '%s' has the required layers"), physicalDevice.DeviceName);
             {
                 u32 availableLayerCount = 0;
                 VK_CHECK(data->vkEnumerateDeviceLayerProperties(physicalDevice.Device, &availableLayerCount, nil));
@@ -229,14 +247,15 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
                     }
 
                     if (!found) {
-                        LogError(String_FromCString("Physical Device '%s' does not have the layer '%s'"), physicalDevice.DeviceName, layerString);
+                        LogError(String_FromCString("        Physical Device '%s' does not have the layer '%s'"), physicalDevice.DeviceName, layerString);
                         hasLayers = FALSE;
                     }
                 }
                 if (!hasLayers) continue;
             }
-            LogDebug(String_FromLiteral("Physical Device '%s' has the required layers"), physicalDevice.DeviceName);
+            LogDebug(String_FromLiteral("      Physical Device '%s' has the required layers"), physicalDevice.DeviceName);
 
+            LogDebug(String_FromLiteral("      Checking Physical Device '%s' has the required extensions"), physicalDevice.DeviceName);
             {
                 u32 availableExtensionCount = 0;
                 VK_CHECK(data->vkEnumerateDeviceExtensionProperties(physicalDevice.Device, nil, &availableExtensionCount, nil));
@@ -257,13 +276,13 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
                     }
 
                     if (!found) {
-                        LogError(String_FromCString("Physical Device '%s' does not have the extension '%s'"), physicalDevice.DeviceName, extensionString);
+                        LogError(String_FromCString("        Physical Device '%s' does not have the extension '%s'"), physicalDevice.DeviceName, extensionString);
                         hasExtensions = FALSE;
                     }
                 }
                 if (!hasExtensions) continue;
             }
-            LogDebug(String_FromLiteral("Physical Device '%s' has the required extensions"), physicalDevice.DeviceName);
+            LogDebug(String_FromLiteral("      Physical Device '%s' has the required extensions"), physicalDevice.DeviceName);
 
             chosenPhysicalDevice = physicalDevice;
 
@@ -273,24 +292,23 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
         }
 
         if (chosenPhysicalDevice.Device == VK_NULL_HANDLE) {
-            LogError(String_FromLiteral("Unable to find a suitable physical device"));
+            LogError(String_FromLiteral("    Unable to find a suitable physical device"));
             goto Error;
         }
 
         data->PhysicalDevice = chosenPhysicalDevice;
-
-        LogDebug(String_FromLiteral("Chosen physical device: '%s', Vulkan API Version: %u.%u.%u"),
-            data->PhysicalDevice.DeviceName,
-            VK_VERSION_MAJOR(data->PhysicalDevice.Properties.apiVersion),
-            VK_VERSION_MINOR(data->PhysicalDevice.Properties.apiVersion),
-            VK_VERSION_PATCH(data->PhysicalDevice.Properties.apiVersion)
-        );
     }
+    LogDebug(String_FromLiteral("  Chosen physical device: '%s', Vulkan API Version: %u.%u.%u"),
+        data->PhysicalDevice.DeviceName,
+        VK_VERSION_MAJOR(data->PhysicalDevice.Properties.apiVersion),
+        VK_VERSION_MINOR(data->PhysicalDevice.Properties.apiVersion),
+        VK_VERSION_PATCH(data->PhysicalDevice.Properties.apiVersion)
+    );
 
-    LogDebug(String_FromLiteral("Created Vulkan Renderer"));
+    LogDebug(String_FromLiteral("Created Vulkan Renderer\n"));
     return TRUE;
 Error:
-    LogError(String_FromLiteral("Failed to create Vulkan Renderer!"));
+    LogError(String_FromLiteral("Failed to create Vulkan Renderer!\n"));
     VulkanRenderer_Destroy(outRenderer);
     return FALSE;
 
@@ -298,6 +316,8 @@ Error:
 }
 
 void VulkanRenderer_Destroy(Renderer* renderer) {
+    LogDebug(String_FromLiteral("Destroying Vulkan Renderer"));
+
     if (renderer == nil) {
         return;
     }
@@ -305,29 +325,35 @@ void VulkanRenderer_Destroy(Renderer* renderer) {
     VulkanRenderer* data = renderer->_PrivateData;
 
     if (data->Instance != VK_NULL_HANDLE) {
+        LogDebug(String_FromLiteral("  Destroying Vulkan Instance"));
+
         if (data->Surface != VK_NULL_HANDLE) {
+            LogDebug(String_FromLiteral("    Destroying Vulkan Surface"));
             data->vkDestroySurfaceKHR(data->Instance, data->Surface, data->Allocator);
-            LogDebug(String_FromLiteral("Destroyed Vulkan Surface"));
+            LogDebug(String_FromLiteral("    Destroyed Vulkan Surface"));
         }
 #if !defined(THALLIUM_RELEASE)
         if (data->DebugMessenger != VK_NULL_HANDLE) {
+            LogDebug(String_FromLiteral("    Destroying Vulkan Debug Messenger"));
             data->vkDestroyDebugUtilsMessengerEXT(data->Instance, data->DebugMessenger, data->Allocator);
-            LogDebug(String_FromLiteral("Destroyed Vulkan Debug Messenger"));
+            LogDebug(String_FromLiteral("    Destroyed Vulkan Debug Messenger"));
         }
 #endif
         data->vkDestroyInstance(data->Instance, data->Allocator);
-        LogDebug(String_FromLiteral("Destroyed Vulkan Instance"));
+        LogDebug(String_FromLiteral("  Destroyed Vulkan Instance"));
     }
 
 #if defined(THALLIUM_PLATFORM_WINDOWS)
+    LogDebug(String_FromLiteral("  Unloading 'vulkan-1.dll'"));
     FreeLibrary(data->VulkanDllHandle);
+    LogDebug(String_FromLiteral("  Unloaded 'vulkan-1.dll'"));
 #endif
 
     Deallocate(data);
 
     *renderer = (Renderer){};
 
-    LogDebug(String_FromLiteral("Destroyed Vulkan Renderer"));
+    LogDebug(String_FromLiteral("Destroyed Vulkan Renderer\n"));
 }
 
 #if !defined(THALLIUM_RELEASE)
@@ -342,11 +368,11 @@ static VkBool32 VKAPI_CALL DebugMessengerCallback(
 
     switch (messageSeverity) {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT: {
-            LogTrace(String_FromLiteral("Vulkan Trace: %s"), String_FromCString(pCallbackData->pMessage));
+            // LogTrace(String_FromLiteral("Vulkan Trace: %s"), String_FromCString(pCallbackData->pMessage));
         } break;
 
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT: {
-            LogTrace(String_FromLiteral("Vulkan Debug: %s"), String_FromCString(pCallbackData->pMessage));
+            // LogTrace(String_FromLiteral("Vulkan Debug: %s"), String_FromCString(pCallbackData->pMessage));
         } break;
 
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT: {
