@@ -7,16 +7,18 @@
 
 typedef struct Surface Surface;
 
-typedef void Surface_DestroyFunc(Surface* surface);
-typedef void Surface_UpdateFunc(Surface* surface);
-
 typedef void Surface_OnCloseCallbackFunc(Surface* surface);
 typedef void Surface_OnKeyCallbackFunc(Surface* surface, KeyCode key, b8 pressed);
+typedef void Surface_OnResizeCallbackFunc(Surface* surface, u32 width, u32 height);
+
+typedef void Surface_DestroyFunc(Surface* surface);
+typedef void Surface_UpdateFunc(Surface* surface);
 
 typedef struct Surface {
     void* UserData;
     Surface_OnCloseCallbackFunc* OnCloseCallback;
     Surface_OnKeyCallbackFunc* OnKeyCallback;
+    Surface_OnResizeCallbackFunc* OnResizeCallback;
     Surface_DestroyFunc* _Destroy;
     Surface_UpdateFunc* _Update;
     void* _PrivateData;

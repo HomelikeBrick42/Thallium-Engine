@@ -32,6 +32,20 @@ LRESULT CALLBACK WindowMessageCallback(HWND hWnd, UINT message, WPARAM wParam, L
             }
         } break;
 
+        case WM_SIZE: {
+            if (surface->Surface->OnResizeCallback != nil) {
+                RECT clientRect;
+                GetClientRect(surface->Handle, &clientRect);
+
+                s32 width = clientRect.right - clientRect.left;
+                s32 height = clientRect.bottom - clientRect.top;
+
+                if (width > 0 && height > 0) {
+                    surface->Surface->OnResizeCallback(surface->Surface, cast(u32) width, cast(u32) height);
+                }
+            }
+        } break;
+
         case WM_KEYDOWN:
         case WM_SYSKEYDOWN:
         case WM_KEYUP:
@@ -126,6 +140,7 @@ b8 Win32_Surface_Create(Surface* outSurface, String name, u32 width, u32 height)
         .UserData = nil,
         .OnCloseCallback = nil,
         .OnKeyCallback = nil,
+        .OnResizeCallback = nil,
         ._Destroy = Win32_Surface_Destroy,
         ._Update = Win32_Surface_Update,
         ._PrivateData = data,

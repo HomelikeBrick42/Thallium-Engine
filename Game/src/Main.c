@@ -22,6 +22,12 @@ static void OnKeyCallback(Surface* surface, KeyCode key, b8 pressed) {
     );
 }
 
+static void OnResizeCallback(Surface* surface, u32 width, u32 height) {
+    GameData* data = cast(GameData*) surface->UserData;
+    Renderer_OnSurfaceResize(&data->Renderer, width, height);
+    LogTrace(String_FromLiteral("Resize: %u, %u"), width, height);
+}
+
 int main(int argc, char** argv) {
     GameData data = {};
     data.Name = String_FromLiteral("Test Game");
@@ -35,6 +41,7 @@ int main(int argc, char** argv) {
     data.Surface.UserData = &data;
     data.Surface.OnCloseCallback = OnCloseCallback;
     data.Surface.OnKeyCallback = OnKeyCallback;
+    data.Surface.OnResizeCallback = OnResizeCallback;
 
     if (!Renderer_Create(&data.Renderer, RendererAPI_Vulkan, &data.Surface, data.Name)) {
         return -1;
