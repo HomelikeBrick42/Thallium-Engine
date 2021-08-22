@@ -4,10 +4,6 @@
 #include "Core/Allocator.h"
 #include "Core/Logger.h"
 
-#if defined(THALLIUM_PLATFORM_WINDOWS)
-    #include <Windows.h>    
-#endif
-
 static const char* InstanceLayers[] = {
 #if !defined(THALLIUM_RELEASE)
     "VK_LAYER_KHRONOS_validation",
@@ -19,7 +15,7 @@ static const char* InstanceExtensions[] = {
     VK_EXT_DEBUG_UTILS_EXTENSION_NAME,
 #endif
 #if defined(THALLIUM_PLATFORM_WINDOWS)
-    "VK_KHR_win32_surface",
+    VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 #endif
     VK_KHR_SURFACE_EXTENSION_NAME,
 };
@@ -180,6 +176,16 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
     LogDebug(String_FromLiteral("Created Vulkan Debug Messenger"));
 #endif
 
+    data->Surface = VK_NULL_HANDLE;
+#if defined(THALLIUM_PLATFORM_WINDOWS)
+    if (data->vkCreateWin32SurfaceKHR(data->Instance, &(VkWin32SurfaceCreateInfoKHR){
+        .sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
+        .hinstance = (cast(Win32_Surface*) surface->_PrivateData)->Instance,
+        .hwnd = (cast(Win32_Surface*) surface->_PrivateData)->Handle,
+    }, data->Allocator, &data->Surface) != VK_SUCCESS || data->Surface == VK_NULL_HANDLE) goto Error;
+#endif
+    LogDebug(String_FromLiteral("Created Vulkan Surface"));
+
     {
         u32 physicalDevicesCount = 0;
         VK_CHECK(data->vkEnumeratePhysicalDevices(data->Instance, &physicalDevicesCount, nil));
@@ -299,6 +305,10 @@ void VulkanRenderer_Destroy(Renderer* renderer) {
     VulkanRenderer* data = renderer->_PrivateData;
 
     if (data->Instance != VK_NULL_HANDLE) {
+        if (data->Surface != VK_NULL_HANDLE) {
+            data->vkDestroySurfaceKHR(data->Instance, data->Surface, data->Allocator);
+            LogDebug(String_FromLiteral("Destroyed Vulkan Surface"));
+        }
 #if !defined(THALLIUM_RELEASE)
         if (data->DebugMessenger != VK_NULL_HANDLE) {
             data->vkDestroyDebugUtilsMessengerEXT(data->Instance, data->DebugMessenger, data->Allocator);

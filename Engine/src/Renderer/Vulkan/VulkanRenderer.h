@@ -4,6 +4,12 @@
 
 #include <vulkan/vulkan.h>
 
+#if defined(THALLIUM_PLATFORM_WINDOWS)
+    #include <Windows.h>
+    #include <vulkan/vulkan_win32.h>
+    #include "Platform/Win32/WindowsSurface.h"
+#endif
+
 #define VULKAN_FUNCTIONS \
     VULKAN_FUNCTION(vkCreateInstance) \
     VULKAN_FUNCTION(vkEnumerateInstanceVersion) \
@@ -17,7 +23,9 @@
     VULKAN_INSTANCE_FUNCTION(vkEnumeratePhysicalDevices) \
     VULKAN_INSTANCE_FUNCTION(vkGetPhysicalDeviceProperties) \
     VULKAN_INSTANCE_FUNCTION(vkEnumerateDeviceLayerProperties) \
-    VULKAN_INSTANCE_FUNCTION(vkEnumerateDeviceExtensionProperties)
+    VULKAN_INSTANCE_FUNCTION(vkEnumerateDeviceExtensionProperties) \
+    VULKAN_INSTANCE_FUNCTION(vkCreateWin32SurfaceKHR) \
+    VULKAN_INSTANCE_FUNCTION(vkDestroySurfaceKHR)
 
 typedef struct VulkanPhysicalDevice {
     VkPhysicalDevice Device;
@@ -34,6 +42,7 @@ typedef struct VulkanRenderer {
     VkDebugUtilsMessengerEXT DebugMessenger;
 #endif
     VulkanPhysicalDevice PhysicalDevice;
+    VkSurfaceKHR Surface;
 
     PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
     
