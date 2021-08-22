@@ -62,6 +62,10 @@ typedef struct VulkanRenderer {
 b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name);
 void VulkanRenderer_Destroy(Renderer* renderer);
 
+void VulkanRenderer_OnSurfaceResize(Renderer* renderer, u32 width, u32 height);
+b8 VulkanRenderer_BeginFrame(Renderer* renderer, f32 dt);
+b8 VulkanRenderer_EndFrame(Renderer* renderer, f32 dt);
+
 #if !defined(KEEP_VULKAN_FUNCTION_MACROS)
     #undef VULKAN_FUNCTIONS
     #undef VULKAN_INSTANCE_FUNCTIONS

@@ -34,6 +34,21 @@ void Logger_Log(LogLevel level, String format, ...) {
                     }
                 } break;
 
+                case 'l': {
+                    i++;
+                    if (format.Data[i] == 'l' && format.Data[i + 1] == 'u') {
+                        i += 2;
+
+                        u64 value = va_arg(args, u64);
+                        char buf[128] = {};
+                        sprintf(buf, "%llu", value);
+                        String string = String_FromCString(buf);
+                        for (u64 i = 0; i < string.Length; i++) {
+                            Buffer_Push(buffer, string.Data[i]);
+                        }
+                    }
+                } break;
+
                 case 'u': {
                     u32 value = va_arg(args, u32);
                     char buf[128] = {};

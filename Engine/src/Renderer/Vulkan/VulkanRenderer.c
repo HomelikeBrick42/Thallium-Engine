@@ -54,6 +54,9 @@ b8 VulkanRenderer_Create(Renderer* outRenderer, Surface* surface, String name) {
 
     *outRenderer = (Renderer){
         ._Destroy = VulkanRenderer_Destroy,
+        ._OnSurfaceResize = VulkanRenderer_OnSurfaceResize,
+        ._BeginFrame = VulkanRenderer_BeginFrame,
+        ._EndFrame = VulkanRenderer_EndFrame,
         ._Surface = surface,
         ._PrivateData = data,
     };
@@ -354,6 +357,24 @@ void VulkanRenderer_Destroy(Renderer* renderer) {
     *renderer = (Renderer){};
 
     LogDebug(String_FromLiteral("Destroyed Vulkan Renderer\n"));
+}
+
+void VulkanRenderer_OnSurfaceResize(Renderer* renderer, u32 width, u32 height) {
+    (void)renderer;
+    (void)width;
+    (void)height;
+}
+
+b8 VulkanRenderer_BeginFrame(Renderer* renderer, f32 dt) {
+    (void)renderer;
+    (void)dt;
+    return TRUE;
+}
+
+b8 VulkanRenderer_EndFrame(Renderer* renderer, f32 dt) {
+    (void)renderer;
+    (void)dt;
+    return TRUE;
 }
 
 #if !defined(THALLIUM_RELEASE)

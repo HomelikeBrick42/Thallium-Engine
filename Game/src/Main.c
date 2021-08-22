@@ -41,6 +41,13 @@ int main(int argc, char** argv) {
     }
 
     while (data.Running) {
+        if (Renderer_BeginFrame(&data.Renderer, 0.0f)) {
+            if (!Renderer_EndFrame(&data.Renderer, 0.0f)) {
+                LogFatal(String_FromLiteral("Failed to end frame. Shutting Down..."));
+                return -1;
+            }
+        }
+
         Surface_Update(&data.Surface);
     }
 
