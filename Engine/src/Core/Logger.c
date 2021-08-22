@@ -3,6 +3,7 @@
 #include "Containers/Buffer.h"
 
 #include <stdarg.h>
+#include <stdio.h>
 
 #if defined(THALLIUM_PLATFORM_WINDOWS)
     #include <Windows.h>
@@ -28,6 +29,16 @@ void Logger_Log(LogLevel level, String format, ...) {
 
                 case 's': {
                     String string = va_arg(args, String);
+                    for (u64 i = 0; i < string.Length; i++) {
+                        Buffer_Push(buffer, string.Data[i]);
+                    }
+                } break;
+
+                case 'u': {
+                    u32 value = va_arg(args, u32);
+                    char buf[128] = {};
+                    sprintf(buf, "%u", value);
+                    String string = String_FromCString(buf);
                     for (u64 i = 0; i < string.Length; i++) {
                         Buffer_Push(buffer, string.Data[i]);
                     }

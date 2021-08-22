@@ -13,7 +13,17 @@
 #define VULKAN_INSTANCE_FUNCTIONS \
     VULKAN_INSTANCE_FUNCTION(vkDestroyInstance) \
     VULKAN_INSTANCE_FUNCTION(vkCreateDebugUtilsMessengerEXT) \
-    VULKAN_INSTANCE_FUNCTION(vkDestroyDebugUtilsMessengerEXT)
+    VULKAN_INSTANCE_FUNCTION(vkDestroyDebugUtilsMessengerEXT) \
+    VULKAN_INSTANCE_FUNCTION(vkEnumeratePhysicalDevices) \
+    VULKAN_INSTANCE_FUNCTION(vkGetPhysicalDeviceProperties) \
+    VULKAN_INSTANCE_FUNCTION(vkEnumerateDeviceLayerProperties) \
+    VULKAN_INSTANCE_FUNCTION(vkEnumerateDeviceExtensionProperties)
+
+typedef struct VulkanPhysicalDevice {
+    VkPhysicalDevice Device;
+    VkPhysicalDeviceProperties Properties;
+    String DeviceName;
+} VulkanPhysicalDevice;
 
 typedef struct VulkanRenderer {
     Renderer* Renderer;
@@ -23,6 +33,7 @@ typedef struct VulkanRenderer {
 #if !defined(THALLIUM_RELEASE)
     VkDebugUtilsMessengerEXT DebugMessenger;
 #endif
+    VulkanPhysicalDevice PhysicalDevice;
 
     PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
     
