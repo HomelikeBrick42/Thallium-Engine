@@ -14,6 +14,7 @@ static void* GetOpenGLFunction(OpenGLRenderer* data, const char* name) {
 }
 
 static b8 MakeCurrent(OpenGLRenderer* data) {
+    // TODO: Test the speed of this compared to checking the current context before switching
     return data->wglMakeCurrent(
         (cast(Win32_Surface*) data->Renderer->_Surface->_PrivateData)->DeviceContext,
         data->OpenGLContext
