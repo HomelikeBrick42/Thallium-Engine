@@ -17,12 +17,6 @@
 
 #define THALLIUM_F32_EPSILON 1.192092896e-07f
 
-THALLIUM_API u32 u32Random();
-THALLIUM_API u32 u32RandomInRange(u32 min, u32 max);
-
-THALLIUM_API f32 f32Random();
-THALLIUM_API f32 f32RandomInRange(f32 min, f32 max);
-
 THALLIUM_API f32 f32sin(f32 x);
 THALLIUM_API f32 f32cos(f32 x);
 THALLIUM_API f32 f32tan(f32 x);
